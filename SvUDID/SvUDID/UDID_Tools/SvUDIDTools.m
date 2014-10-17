@@ -143,16 +143,16 @@ static const char kKeyChainUDIDAccessGroup[] = "YOURAPPID.com.cnblogs.smileEvday
 + (NSString*)getUDIDFromKeyChain
 {
     NSMutableDictionary *dictForQuery = [[NSMutableDictionary alloc] init];
-    [dictForQuery setValue:(id)kSecClassGenericPassword forKey:(id)kSecClass];
+    [dictForQuery setValue:(__arc_mrc_bridge id)kSecClassGenericPassword forKey:(__arc_mrc_bridge id)kSecClass];
     
     // set Attr Description for query
     [dictForQuery setValue:[NSString stringWithUTF8String:kKeychainUDIDItemIdentifier]
-                    forKey:kSecAttrDescription];
+                    forKey:(__arc_mrc_bridge NSString*)kSecAttrDescription];
     
     // set Attr Identity for query
     NSData *keychainItemID = [NSData dataWithBytes:kKeychainUDIDItemIdentifier
                                             length:strlen(kKeychainUDIDItemIdentifier)];
-    [dictForQuery setObject:keychainItemID forKey:(id)kSecAttrGeneric];
+    [dictForQuery setObject:keychainItemID forKey:(__arc_mrc_bridge id)kSecAttrGeneric];
     
     // The keychain access group attribute determines if this item can be shared
     // amongst multiple apps whose code signing entitlements contain the same keychain access group.
@@ -173,18 +173,18 @@ static const char kKeyChainUDIDAccessGroup[] = "YOURAPPID.com.cnblogs.smileEvday
 #endif
     }
     
-    [dictForQuery setValue:(id)kCFBooleanTrue forKey:(id)kSecMatchCaseInsensitive];
-    [dictForQuery setValue:(id)kSecMatchLimitOne forKey:(id)kSecMatchLimit];
-    [dictForQuery setValue:(id)kCFBooleanTrue forKey:(id)kSecReturnData];
+    [dictForQuery setValue:(id)kCFBooleanTrue forKey:(__arc_mrc_bridge id)kSecMatchCaseInsensitive];
+    [dictForQuery setValue:(__arc_mrc_bridge id)kSecMatchLimitOne forKey:(__arc_mrc_bridge id)kSecMatchLimit];
+    [dictForQuery setValue:(id)kCFBooleanTrue forKey:(__arc_mrc_bridge id)kSecReturnData];
     
     OSStatus queryErr   = noErr;
     NSData   *udidValue = nil;
     NSString *udid      = nil;
-    queryErr = SecItemCopyMatching((CFDictionaryRef)dictForQuery, (CFTypeRef*)&udidValue);
+    queryErr = SecItemCopyMatching((__arc_mrc_bridge CFDictionaryRef)dictForQuery, (__arc_mrc_CFTypeRef*)&udidValue);
     
     NSMutableDictionary *dict = nil;
-    [dictForQuery setValue:(id)kCFBooleanTrue forKey:(id)kSecReturnAttributes];
-    queryErr = SecItemCopyMatching((CFDictionaryRef)dictForQuery, (CFTypeRef*)&dict);
+    [dictForQuery setValue:(id)kCFBooleanTrue forKey:(__arc_mrc_bridge id)kSecReturnAttributes];
+    queryErr = SecItemCopyMatching((__arc_mrc_bridge CFDictionaryRef)dictForQuery, (__arc_mrc_CFTypeRef *)&dict);
     
     if (queryErr == errSecItemNotFound) {
         NSLog(@"KeyChain Item: %@ not found!!!", [NSString stringWithUTF8String:kKeychainUDIDItemIdentifier]);
@@ -197,12 +197,12 @@ static const char kKeyChainUDIDAccessGroup[] = "YOURAPPID.com.cnblogs.smileEvday
         
         if (udidValue) {
             udid = [NSString stringWithUTF8String:udidValue.bytes];
-            [udidValue release];
+            arc_mrc_release(udidValue);
         }
-        [dict release];
+        arc_mrc_release(dict);
     }
     
-    [dictForQuery release];
+    arc_mrc_release(dictForQuery);
     return udid;
 }
 
@@ -210,14 +210,14 @@ static const char kKeyChainUDIDAccessGroup[] = "YOURAPPID.com.cnblogs.smileEvday
 {
     NSMutableDictionary *dictForAdd = [[NSMutableDictionary alloc] init];
     
-    [dictForAdd setValue:(id)kSecClassGenericPassword forKey:(id)kSecClass];
-    [dictForAdd setValue:[NSString stringWithUTF8String:kKeychainUDIDItemIdentifier] forKey:kSecAttrDescription];
+    [dictForAdd setValue:(__arc_mrc_bridge id)kSecClassGenericPassword forKey:(__arc_mrc_bridge id)kSecClass];
+    [dictForAdd setValue:[NSString stringWithUTF8String:kKeychainUDIDItemIdentifier] forKey:(__arc_mrc_bridge NSString *)(kSecAttrDescription)];
     
-    [dictForAdd setValue:@"UUID" forKey:(id)kSecAttrGeneric];
+    [dictForAdd setValue:@"UUID" forKey:(__arc_mrc_bridge id)kSecAttrGeneric];
     
     // Default attributes for keychain item.
-    [dictForAdd setObject:@"" forKey:(id)kSecAttrAccount];
-    [dictForAdd setObject:@"" forKey:(id)kSecAttrLabel];
+    [dictForAdd setObject:@"" forKey:(__arc_mrc_bridge id)kSecAttrAccount];
+    [dictForAdd setObject:@"" forKey:(__arc_mrc_bridge id)kSecAttrLabel];
     
     
     // The keychain access group attribute determines if this item can be shared
@@ -241,30 +241,30 @@ static const char kKeyChainUDIDAccessGroup[] = "YOURAPPID.com.cnblogs.smileEvday
 
     const char *udidStr = [udid UTF8String];
     NSData *keyChainItemValue = [NSData dataWithBytes:udidStr length:strlen(udidStr)];
-    [dictForAdd setValue:keyChainItemValue forKey:(id)kSecValueData];
+    [dictForAdd setValue:keyChainItemValue forKey:(__arc_mrc_bridge id)kSecValueData];
     
     OSStatus writeErr = noErr;
     if ([SvUDIDTools getUDIDFromKeyChain]) {        // there is item in keychain
         [SvUDIDTools updateUDIDInKeyChain:udid];
-        [dictForAdd release];
+        arc_mrc_release(dictForAdd);
         return YES;
     }
     else {          // add item to keychain
-        writeErr = SecItemAdd((CFDictionaryRef)dictForAdd, NULL);
+        writeErr = SecItemAdd((__arc_mrc_bridge CFDictionaryRef)dictForAdd, NULL);
         if (writeErr != errSecSuccess) {
             NSLog(@"Add KeyChain Item Error!!! Error Code:%ld", writeErr);
             
-            [dictForAdd release];
+            arc_mrc_release(dictForAdd);
             return NO;
         }
         else {
             NSLog(@"Add KeyChain Item Success!!!");
-            [dictForAdd release];
+            arc_mrc_release(dictForAdd);
             return YES;
         }
     }
-    
-    [dictForAdd release];
+
+    arc_mrc_release(dictForAdd);
     return NO;
 }
 
@@ -272,23 +272,23 @@ static const char kKeyChainUDIDAccessGroup[] = "YOURAPPID.com.cnblogs.smileEvday
 {
     NSMutableDictionary *dictToDelete = [[NSMutableDictionary alloc] init];
     
-    [dictToDelete setValue:(id)kSecClassGenericPassword forKey:(id)kSecClass];
+    [dictToDelete setValue:(__arc_mrc_bridge id)kSecClassGenericPassword forKey:(__arc_mrc_bridge id)kSecClass];
     
     NSData *keyChainItemID = [NSData dataWithBytes:kKeychainUDIDItemIdentifier length:strlen(kKeychainUDIDItemIdentifier)];
-    [dictToDelete setValue:keyChainItemID forKey:(id)kSecAttrGeneric];
+    [dictToDelete setValue:keyChainItemID forKey:(__arc_mrc_bridge id)kSecAttrGeneric];
     
     OSStatus deleteErr = noErr;
-    deleteErr = SecItemDelete((CFDictionaryRef)dictToDelete);
+    deleteErr = SecItemDelete((__arc_mrc_bridge CFDictionaryRef)dictToDelete);
     if (deleteErr != errSecSuccess) {
         NSLog(@"delete UUID from KeyChain Error!!! Error code:%ld", deleteErr);
-        [dictToDelete release];
+        arc_mrc_release(dictToDelete);
         return NO;
     }
     else {
         NSLog(@"delete success!!!");
     }
-    
-    [dictToDelete release];
+
+    arc_mrc_release(dictToDelete);
     return YES;
 }
 
@@ -297,54 +297,54 @@ static const char kKeyChainUDIDAccessGroup[] = "YOURAPPID.com.cnblogs.smileEvday
     
     NSMutableDictionary *dictForQuery = [[NSMutableDictionary alloc] init];
     
-    [dictForQuery setValue:(id)kSecClassGenericPassword forKey:(id)kSecClass];
+    [dictForQuery setValue:(__arc_mrc_bridge id)kSecClassGenericPassword forKey:(__arc_mrc_bridge id)kSecClass];
    
     NSData *keychainItemID = [NSData dataWithBytes:kKeychainUDIDItemIdentifier
                                             length:strlen(kKeychainUDIDItemIdentifier)];
-    [dictForQuery setValue:keychainItemID forKey:(id)kSecAttrGeneric];
-    [dictForQuery setValue:(id)kCFBooleanTrue forKey:(id)kSecMatchCaseInsensitive];
-    [dictForQuery setValue:(id)kSecMatchLimitOne forKey:(id)kSecMatchLimit];
-    [dictForQuery setValue:(id)kCFBooleanTrue forKey:(id)kSecReturnAttributes];
+    [dictForQuery setValue:keychainItemID forKey:(__arc_mrc_bridge id)kSecAttrGeneric];
+    [dictForQuery setValue:(id)kCFBooleanTrue forKey:(__arc_mrc_bridge id)kSecMatchCaseInsensitive];
+    [dictForQuery setValue:(__arc_mrc_bridge id)kSecMatchLimitOne forKey:(__arc_mrc_bridge id)kSecMatchLimit];
+    [dictForQuery setValue:(id)kCFBooleanTrue forKey:(__arc_mrc_bridge id)kSecReturnAttributes];
     
     NSDictionary *queryResult = nil;
-    SecItemCopyMatching((CFDictionaryRef)dictForQuery, (CFTypeRef*)&queryResult);
+    SecItemCopyMatching((__arc_mrc_bridge CFDictionaryRef)dictForQuery, (__arc_mrc_CFTypeRef*)&queryResult);
     if (queryResult) {
         
         NSMutableDictionary *dictForUpdate = [[NSMutableDictionary alloc] init];
-        [dictForUpdate setValue:[NSString stringWithUTF8String:kKeychainUDIDItemIdentifier] forKey:kSecAttrDescription];
-        [dictForUpdate setValue:keychainItemID forKey:(id)kSecAttrGeneric];
+        [dictForUpdate setValue:[NSString stringWithUTF8String:kKeychainUDIDItemIdentifier] forKey:(__arc_mrc_bridge NSString *)(kSecAttrDescription)];
+        [dictForUpdate setValue:keychainItemID forKey:(__arc_mrc_bridge id)kSecAttrGeneric];
         
         const char *udidStr = [newUDID UTF8String];
         NSData *keyChainItemValue = [NSData dataWithBytes:udidStr length:strlen(udidStr)];
-        [dictForUpdate setValue:keyChainItemValue forKey:(id)kSecValueData];
+        [dictForUpdate setValue:keyChainItemValue forKey:(__arc_mrc_bridge id)kSecValueData];
         
         OSStatus updateErr = noErr;
         
         // First we need the attributes from the Keychain.
         NSMutableDictionary *updateItem = [NSMutableDictionary dictionaryWithDictionary:queryResult];
-        [queryResult release];
+        arc_mrc_release(queryResult);
         
         // Second we need to add the appropriate search key/values.
         // set kSecClass is Very important
-        [updateItem setObject:(id)kSecClassGenericPassword forKey:(id)kSecClass];
+        [updateItem setObject:(__arc_mrc_bridge id)kSecClassGenericPassword forKey:(__arc_mrc_bridge id)kSecClass];
         
-        updateErr = SecItemUpdate((CFDictionaryRef)updateItem, (CFDictionaryRef)dictForUpdate);
+        updateErr = SecItemUpdate((__arc_mrc_bridge CFDictionaryRef)updateItem, (__arc_mrc_bridge CFDictionaryRef)dictForUpdate);
         if (updateErr != errSecSuccess) {
             NSLog(@"Update KeyChain Item Error!!! Error Code:%ld", updateErr);
             
-            [dictForQuery release];
-            [dictForUpdate release];
+            arc_mrc_release(dictForQuery);
+            arc_mrc_release(dictForUpdate);
             return NO;
         }
         else {
             NSLog(@"Update KeyChain Item Success!!!");
-            [dictForQuery release];
-            [dictForUpdate release];
+            arc_mrc_release(dictForQuery);
+            arc_mrc_release(dictForUpdate);
             return YES;
         }
     }
     
-    [dictForQuery release];
+    arc_mrc_release(dictForQuery);
     return NO;
 }
 
